@@ -49,20 +49,28 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, toRefs } from 'vue'
+
+const props = defineProps({
+  initialCurrency: { type: String, default: 'PEN' },
+  initialTerm: { type: Number, default: 20 }
+})
 
 const currencies = [
   { id: 'PEN', label: 'Soles (PEN)' },
   { id: 'USD', label: 'Dólares (USD)' }
 ]
 
-const selectedCurrency = ref('PEN')
-const loanTerm = ref(20)
+const selectedCurrency = ref(props.initialCurrency)
+const loanTerm = ref(props.initialTerm)
 
 const emit = defineEmits(['update:currency', 'update:term'])
 
+watch(() => props.initialCurrency, (val) => selectedCurrency.value = val)
+watch(() => props.initialTerm, (val) => loanTerm.value = val)
+
 const updateLoanTerm = () => {
-  emit('update:term', loanTerm.value)
+  emit('update:term', parseInt(loanTerm.value))
 }
 
 watch(selectedCurrency, (newValue) => {

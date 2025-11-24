@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <!-- Section Title -->
     <div>
-      <h2 class="text-xl font-semibold text-gray-900 mb-2">Seleccionar Entidad Financiera</h2>
+      <h2 class="text-xl font-semibold text-gray-900 mb-2">Seleccionar entidad financiera</h2>
     </div>
 
     <!-- Grid -->

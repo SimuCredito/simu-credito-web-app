@@ -99,10 +99,11 @@
 import { ref, watch } from 'vue'
 
 const props = defineProps({
-  selectedEntity: {
-    type: Object,
-    default: null
-  }
+  selectedEntity: { type: Object, default: null },
+  initialRate: { type: Number, default: 9.25 },
+  initialType: { type: String, default: 'TE' },
+  initialPeriod: { type: String, default: 'monthly' },
+  initialCap: { type: String, default: 'daily' }
 })
 
 const rateTypes = [
@@ -132,22 +133,24 @@ const capitalizations = [
   { id: 'annual', label: 'Anual' }
 ];
 
-const selectedRateType = ref('TE')
-const selectedPeriod = ref('monthly')
-const selectedCapitalization = ref('daily')
-const interestRate = ref(9.25)
+const selectedRateType = ref(props.initialType)
+const selectedPeriod = ref(props.initialPeriod)
+const selectedCapitalization = ref(props.initialCap)
+const interestRate = ref(props.initialRate)
 
 const emit = defineEmits(['update:interestRate', 'update:rateType', 'update:period', 'update:capitalization'])
 
-// Pre-load values from selected entity
+watch(() => props.initialRate, (val) => interestRate.value = val)
+watch(() => props.initialType, (val) => selectedRateType.value = val)
+watch(() => props.initialPeriod, (val) => selectedPeriod.value = val)
+watch(() => props.initialCap, (val) => selectedCapitalization.value = val)
+
 watch(() => props.selectedEntity, (newEntity) => {
   if (newEntity) {
-    // Pre-load interest rate from entity
     if (newEntity.interestRateTea) {
       interestRate.value = newEntity.interestRateTea
     }
 
-    // Set capitalization period from entity
     if (newEntity.capitalizationPeriod) {
       selectedCapitalization.value = newEntity.capitalizationPeriod.toLowerCase()
     }

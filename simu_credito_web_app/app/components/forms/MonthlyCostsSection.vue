@@ -56,14 +56,21 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
-const constantCommissions = ref(0)
-const administrationCosts = ref(0)
+const props = defineProps({
+  initialCommissions: { type: Number, default: 0 },
+  initialAdminCosts: { type: Number, default: 0 }
+})
+
+const constantCommissions = ref(props.initialCommissions)
+const administrationCosts = ref(props.initialAdminCosts)
 
 const emit = defineEmits(['update:constantCommissions', 'update:administrationCosts'])
 
-// Observar cambios locales y emitirlos al padre
+watch(() => props.initialCommissions, (val) => constantCommissions.value = val)
+watch(() => props.initialAdminCosts, (val) => administrationCosts.value = val)
+
 watch(constantCommissions, (newValue) => {
   emit('update:constantCommissions', newValue)
 })

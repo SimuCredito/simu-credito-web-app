@@ -54,17 +54,21 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
-const selectedDelivery = ref('electronic')
+const props = defineProps({
+  initialDelivery: { type: String, default: 'electronic' }
+})
+
+const selectedDelivery = ref(props.initialDelivery)
 
 const emit = defineEmits(['update:deliveryMethod'])
 
-// Observar cambios locales y emitirlos al padre
+watch(() => props.initialDelivery, (val) => selectedDelivery.value = val)
+
 watch(selectedDelivery, (newValue) => {
   emit('update:deliveryMethod', newValue)
 })
 
-// Emitir valor inicial
 emit('update:deliveryMethod', selectedDelivery.value)
 </script>
