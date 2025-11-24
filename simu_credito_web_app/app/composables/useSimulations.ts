@@ -1,6 +1,9 @@
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
+// Estado global para compartir datos entre la vista de resultados y el simulador
+const simulationDraft = ref(null)
+
 export const useSimulations = () => {
   const { apiFetch } = useApi()
 
@@ -17,17 +20,30 @@ export const useSimulations = () => {
     }
   }
 
-    const getSimulationById = async (simulationId: string) => {
-        try {
-            const response = await apiFetch(`/simulations/${simulationId}`, {
-                method: 'GET',
-            })
-            return response
-        } catch (error) {
-            console.error('Error fetching simulation by ID:', error)
-            throw error
-        }
+  // --- NUEVO: Obtener historial del usuario ---
+  const listUserSimulations = async () => {
+    try {
+      const response = await apiFetch('/simulations', {
+        method: 'GET',
+      })
+      return response
+    } catch (error) {
+      console.error('Error fetching user simulations:', error)
+      throw error
     }
+  }
+
+  const getSimulationById = async (simulationId: string) => {
+    try {
+      const response = await apiFetch(`/simulations/${simulationId}`, {
+        method: 'GET',
+      })
+      return response
+    } catch (error) {
+      console.error('Error fetching simulation by ID:', error)
+      throw error
+    }
+  }
 
   const getAmortizationSchedule = async (simulationId: string, page: number = 0, size: number = 10) => {
     try {
@@ -66,8 +82,8 @@ export const useSimulations = () => {
         ['Monto Financiado', `S/ ${simulationData.summary?.financingAmount?.toLocaleString() || '0'}`]
       ]
 
-        autoTable(doc, {
-            startY: 100,
+      autoTable(doc, {
+        startY: 100,
         head: [['Concepto', 'Monto']],
         body: summaryData,
         theme: 'grid',
@@ -89,8 +105,8 @@ export const useSimulations = () => {
         ['Total Intereses', `S/ ${simulationData.keyIndicators?.totalInterest?.toLocaleString() || '0'}`]
       ]
 
-        autoTable(doc, {
-            startY: indicatorsY + 10,
+      autoTable(doc, {
+        startY: indicatorsY + 10,
         head: [['Indicador', 'Valor']],
         body: indicatorsData,
         theme: 'grid',
@@ -105,12 +121,13 @@ export const useSimulations = () => {
 
       // Get all payments for the table
 
-        const allPayments = simulationData.amortizationSchedule?.payments || []
+      const allPayments = simulationData.amortizationSchedule?.payments || []
 
-      const tableData = allPayments.map(payment => [
+      const tableData = allPayments.map((payment: any) => [
         payment.paymentNumber,
         `${(payment.tem * 100).toFixed(4)}%`,
-        payment.gracePeriod,
+        // CAMBIO: Usar la descripción o fallback a 'Sin gracia'
+        payment.gracePeriodDescription || 'Sin gracia',
         `S/ ${payment.initialBalance.toLocaleString()}`,
         `S/ ${payment.interest.toLocaleString()}`,
         `S/ ${payment.payment.toLocaleString()}`,
@@ -124,8 +141,8 @@ export const useSimulations = () => {
         `S/ ${payment.cashFlow.toLocaleString()}`
       ])
 
-        autoTable(doc, {
-            startY: tableY + 10,
+      autoTable(doc, {
+        startY: tableY + 10,
         head: [['N° Cuota', 'TEM', 'Plazo de Gracia', 'Saldo Inicial', 'Interés', 'Cuota', 'Amortización', 'Seguro Desgrav.', 'Seguro Riesgo', 'Comisiones', 'Gastos Adm.', 'Portes', 'Saldo Final', 'Flujo']],
         body: tableData,
         theme: 'grid',
@@ -167,10 +184,24 @@ export const useSimulations = () => {
     }
   }
 
-    return {
-        createSimulation,
-        getSimulationById,
-        getAmortizationSchedule,
-        exportSimulationToPDF,
-    }
+  // --- NUEVO: Helpers para Editar/Recalcular ---
+  const setSimulationDraft = (data: any) => {
+    simulationDraft.value = data
+  }
+
+  const getSimulationDraft = () => {
+    const data = simulationDraft.value
+    simulationDraft.value = null // Limpiar después de leer
+    return data
+  }
+
+  return {
+    createSimulation,
+    listUserSimulations, // Exportado
+    getSimulationById,
+    getAmortizationSchedule,
+    exportSimulationToPDF,
+    setSimulationDraft, // Exportado
+    getSimulationDraft  // Exportado
+  }
 }
