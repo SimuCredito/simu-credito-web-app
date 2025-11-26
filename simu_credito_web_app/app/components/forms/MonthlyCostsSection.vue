@@ -10,7 +10,6 @@
     </div>
 
     <div class="grid grid-cols-2 gap-4">
-      <!-- Comisiones constantes -->
       <div class="flex items-center space-x-3">
         <div class="text-gray-400">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -20,18 +19,17 @@
         <div class="flex-1">
           <label class="block text-sm font-medium text-gray-900">Comisiones constantes</label>
           <div class="relative">
-            <span class="absolute left-3 top-2 text-gray-500">S/</span>
+            <span class="absolute left-3 top-2 text-gray-500 font-medium">{{ currencySymbol }}</span>
             <input
-              v-model="constantCommissions"
-              type="number"
-              step="0.01"
-              class="block w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-8 pr-3 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                v-model="constantCommissions"
+                type="number"
+                step="0.01"
+                class="block w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-8 pr-3 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             />
           </div>
         </div>
       </div>
 
-      <!-- Gastos de administración -->
       <div class="flex items-center space-x-3">
         <div class="text-gray-400">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -41,12 +39,12 @@
         <div class="flex-1">
           <label class="block text-sm font-medium text-gray-900">Gastos de administración</label>
           <div class="relative">
-            <span class="absolute left-3 top-2 text-gray-500">S/</span>
+            <span class="absolute left-3 top-2 text-gray-500 font-medium">{{ currencySymbol }}</span>
             <input
-              v-model="administrationCosts"
-              type="number"
-              step="0.01"
-              class="block w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-8 pr-3 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                v-model="administrationCosts"
+                type="number"
+                step="0.01"
+                class="block w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-8 pr-3 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             />
           </div>
         </div>
@@ -56,15 +54,18 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 
 const props = defineProps({
   initialCommissions: { type: Number, default: 0 },
-  initialAdminCosts: { type: Number, default: 0 }
+  initialAdminCosts: { type: Number, default: 0 },
+  currency: { type: String, default: 'PEN' } // Nueva prop
 })
 
 const constantCommissions = ref(props.initialCommissions)
 const administrationCosts = ref(props.initialAdminCosts)
+
+const currencySymbol = computed(() => props.currency === 'USD' ? '$' : 'S/')
 
 const emit = defineEmits(['update:constantCommissions', 'update:administrationCosts'])
 
@@ -81,5 +82,4 @@ watch(administrationCosts, (newValue) => {
 // Emitir valores iniciales
 emit('update:constantCommissions', constantCommissions.value)
 emit('update:administrationCosts', administrationCosts.value)
-
 </script>

@@ -1,29 +1,46 @@
 <template>
   <TransitionGroup
-    name="notification"
-    tag="div"
-    class="notification-container"
+      name="notification"
+      tag="div"
+      class="fixed top-20 right-4 z-50 flex flex-col gap-3 w-full max-w-md pointer-events-none"
   >
     <div
-      v-for="notification in notifications"
-      :key="notification.id"
-      :class="['notification-toast', `notification-${notification.type}`]"
+        v-for="notification in notifications"
+        :key="notification.id"
+        class="pointer-events-auto flex items-start p-4 rounded-r-lg rounded-l-none shadow-lg border-l-4 bg-white transform transition-all duration-300 ring-1 ring-black ring-opacity-5"
+        :class="getBorderClass(notification.type)"
     >
-      <div class="notification-content">
-        <span class="notification-icon">
-          <Icon v-if="notification.type === 'success'" name="heroicons:check-circle" />
-          <Icon v-else-if="notification.type === 'error'" name="heroicons:exclamation-triangle" />
-          <Icon v-else-if="notification.type === 'warning'" name="heroicons:exclamation-circle" />
-          <Icon v-else name="heroicons:information-circle" />
-        </span>
-        <span class="notification-message">{{ notification.message }}</span>
+      <div class="flex-shrink-0">
+        <svg v-if="notification.type === 'success'" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <svg v-else-if="notification.type === 'error'" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <svg v-else-if="notification.type === 'warning'" class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+        </svg>
+        <svg v-else class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
       </div>
-      <button
-        class="notification-close"
-        @click="removeNotification(notification.id)"
-      >
-        <Icon name="heroicons:x-mark" />
-      </button>
+
+      <div class="ml-3 w-0 flex-1 pt-0.5">
+        <p class="text-sm font-medium text-gray-900">{{ getTitle(notification.type) }}</p>
+        <p class="mt-1 text-sm text-gray-500 leading-snug">{{ notification.message }}</p>
+      </div>
+
+      <div class="ml-4 flex-shrink-0 flex">
+        <button
+            @click="removeNotification(notification.id)"
+            class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          <span class="sr-only">Cerrar</span>
+          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
     </div>
   </TransitionGroup>
 </template>
@@ -32,111 +49,41 @@
 import { useNotifications } from '~/composables/useNotifications'
 
 const { notifications, removeNotification } = useNotifications()
+
+const getBorderClass = (type: string) => {
+  switch (type) {
+    case 'success': return 'border-green-500'
+    case 'error': return 'border-red-500'
+    case 'warning': return 'border-yellow-500'
+    case 'info': return 'border-blue-500'
+    default: return 'border-gray-500'
+  }
+}
+
+const getTitle = (type: string) => {
+  switch (type) {
+    case 'success': return '¡Éxito!'
+    case 'error': return 'Error'
+    case 'warning': return 'Advertencia'
+    case 'info': return 'Información'
+    default: return 'Notificación'
+  }
+}
 </script>
 
 <style scoped>
-.notification-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-width: 400px;
-}
-
-.notification-toast {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  animation: slideIn 0.3s ease-out;
-}
-
-.notification-success {
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
-}
-
-.notification-error {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  color: white;
-}
-
-.notification-warning {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: white;
-}
-
-.notification-info {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: white;
-}
-
-.notification-content {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-}
-
-.notification-icon {
-  flex-shrink: 0;
-}
-
-.notification-message {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.notification-close {
-  background: none;
-  border: none;
-  color: inherit;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-  flex-shrink: 0;
-}
-
-.notification-close:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-/* Vue transition classes */
 .notification-enter-active,
 .notification-leave-active {
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .notification-enter-from {
-  transform: translateX(100%);
   opacity: 0;
+  transform: translateX(100%);
 }
 
 .notification-leave-to {
-  transform: translateX(100%);
   opacity: 0;
-}
-
-.notification-move {
-  transition: transform 0.3s ease;
+  transform: translateX(100%);
 }
 </style>

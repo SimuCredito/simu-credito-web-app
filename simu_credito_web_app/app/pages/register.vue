@@ -160,8 +160,12 @@
 </template>
 
 <script setup>
+import { useNotifications } from '~/composables/useNotifications'
+
 const { register } = useAuth()
 const router = useRouter()
+
+const { showSuccess, showError } = useNotifications()
 
 const form = ref({
   firstName: '',
@@ -217,14 +221,17 @@ const handleRegister = async () => {
       form.value.phoneNumber || undefined,
       form.value.companyName || undefined
     )
+
+    showSuccess('Cuenta creada exitosamente. Por favor inicia sesión.')
+
     await router.push('/login')
   } catch (err) {
-    // Handle specific API errors
     if (err.response?.data?.message) {
-      // If it's a general error, show it at the top
       errors.value.general = err.response.data.message
+      showError(err.response.data.message)
     } else {
       errors.value.general = 'Error al crear la cuenta'
+      showError('Ocurrió un error inesperado al crear la cuenta.')
     }
   } finally {
     loading.value = false

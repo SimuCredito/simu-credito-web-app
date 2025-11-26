@@ -3,10 +3,9 @@
     <h3 class="text-lg font-semibold text-gray-900">¿Cómo deseas recibir tu estado de cuenta mensual? (Portes)</h3>
 
     <div class="grid grid-cols-2 gap-4">
-      <!-- Envío Electrónico -->
       <div
-        @click="selectedDelivery = 'electronic'"
-        :class="[
+          @click="selectedDelivery = 'electronic'"
+          :class="[
           'border rounded-lg p-4 cursor-pointer transition-all',
           selectedDelivery === 'electronic'
             ? 'border-indigo-500 bg-indigo-50'
@@ -22,14 +21,14 @@
           <div>
             <h4 class="font-medium text-gray-900">Envío Electrónico</h4>
             <p class="text-sm text-gray-500">Recibe tu estado de cuenta por email</p>
+            <p class="text-xs text-green-600 mt-1 font-medium">Gratis</p>
           </div>
         </div>
       </div>
 
-      <!-- Envío Físico -->
       <div
-        @click="selectedDelivery = 'physical'"
-        :class="[
+          @click="selectedDelivery = 'physical'"
+          :class="[
           'border rounded-lg p-4 cursor-pointer transition-all',
           selectedDelivery === 'physical'
             ? 'border-indigo-500 bg-indigo-50'
@@ -45,7 +44,7 @@
           <div>
             <h4 class="font-medium text-gray-900">Envío Físico</h4>
             <p class="text-sm text-gray-500">Recibe tu estado de cuenta por correo postal</p>
-            <p class="text-xs text-indigo-600 mt-1">Costo: S/ 10.00</p>
+            <p class="text-xs text-indigo-600 mt-1 font-medium">Costo: {{ currency === 'USD' ? '$' : 'S/' }} 10.00</p>
           </div>
         </div>
       </div>
@@ -57,7 +56,8 @@
 import { ref, watch } from 'vue'
 
 const props = defineProps({
-  initialDelivery: { type: String, default: 'electronic' }
+  initialDelivery: { type: String, default: 'electronic' },
+  currency: { type: String, default: 'PEN' } // Nueva prop
 })
 
 const selectedDelivery = ref(props.initialDelivery)

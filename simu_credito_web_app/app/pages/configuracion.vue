@@ -1,8 +1,7 @@
 <template>
   <div class="px-4 sm:px-6 lg:px-8 py-6">
     <div class="mb-6">
-      <h1 class="text-2xl font-semibold text-gray-900">Configuración</h1>
-      <p class="mt-1 text-sm text-gray-500">Administra los parámetros y entidades del sistema.</p>
+      <p class="mt-1 text-sm text-gray-500">Administra las configuraciones generales de la aplicación, incluyendo entidades financieras, parámetros de bonos y valores globales.</p>
     </div>
 
     <div class="border-b border-gray-200 mb-8">

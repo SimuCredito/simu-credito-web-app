@@ -1,7 +1,7 @@
 <template>
   <div class="bg-white rounded-lg shadow border border-gray-200">
     <div class="px-6 py-4 border-b border-gray-200">
-      <h2 class="text-xl font-semibold text-gray-900">Tabla de Amortización</h2>
+      <h2 class="text-xl font-semibold text-gray-900">Tabla de amortización</h2>
     </div>
 
     <div class="overflow-x-auto">
@@ -40,17 +40,17 @@
               </span>
           </td>
 
-          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">S/ {{ payment.initialBalance.toLocaleString() }}</td>
-          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">S/ {{ payment.interest.toLocaleString() }}</td>
-          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">S/ {{ payment.payment.toLocaleString() }}</td>
-          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">S/ {{ payment.principal.toLocaleString() }}</td>
-          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">S/ {{ payment.lifeInsurance.toLocaleString() }}</td>
-          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">S/ {{ payment.propertyInsurance.toLocaleString() }}</td>
-          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">S/ {{ payment.commissions.toLocaleString() }}</td>
-          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">S/ {{ payment.adminCosts.toLocaleString() }}</td>
-          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">S/ {{ payment.deliveryCosts.toLocaleString() }}</td>
-          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">S/ {{ payment.finalBalance.toLocaleString() }}</td>
-          <td class="px-3 py-4 whitespace-nowrap text-sm font-semibold text-red-600">S/ {{ payment.cashFlow.toLocaleString() }}</td>
+          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">{{ format(payment.initialBalance) }}</td>
+          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">{{ format(payment.interest) }}</td>
+          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">{{ format(payment.payment) }}</td>
+          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">{{ format(payment.principal) }}</td>
+          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">{{ format(payment.lifeInsurance) }}</td>
+          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">{{ format(payment.propertyInsurance) }}</td>
+          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">{{ format(payment.commissions) }}</td>
+          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">{{ format(payment.adminCosts) }}</td>
+          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">{{ format(payment.deliveryCosts) }}</td>
+          <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">{{ format(payment.finalBalance) }}</td>
+          <td class="px-3 py-4 whitespace-nowrap text-sm font-semibold text-red-600">{{ format(payment.cashFlow) }}</td>
         </tr>
         </tbody>
       </table>
@@ -123,6 +123,11 @@ const props = defineProps({
   payments: {
     type: Array,
     default: () => []
+  },
+  // Nueva prop para la moneda
+  currency: {
+    type: String,
+    default: 'PEN'
   }
 })
 
@@ -141,4 +146,14 @@ const visiblePages = computed(() => {
 
   return pages
 })
+
+// Helper para formatear
+const format = (val) => {
+  return Number(val).toLocaleString('es-PE', {
+    style: 'currency',
+    currency: props.currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
 </script>

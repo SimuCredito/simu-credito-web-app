@@ -2,8 +2,8 @@
   <div class="flex h-screen">
     <!-- Sidebar -->
     <div class="sidebar">
-      <div class="p-4">
-        <h1 class="text-xl font-bold text-indigo-400">Simu Crédito</h1>
+      <div class="p-4 ">
+        <h1 class="text-xl font-bold text-indigo-400 ">SimuCrédito</h1>
       </div>
       <nav class="mt-8">
         <NuxtLink
@@ -48,16 +48,6 @@
           Simulador
         </NuxtLink>
         <NuxtLink
-            to="/simulador/historial"
-            class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
-            :class="{ 'bg-gray-700 text-white border-r-4 border-indigo-400': $route.path === '/simulador/historial' }"
-        >
-          <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Historial
-        </NuxtLink>
-        <NuxtLink
           to="/configuracion"
           class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
           :class="{ 'bg-gray-700 text-white border-r-4 border-indigo-400': $route.path.startsWith('/configuracion') }"
@@ -77,7 +67,7 @@
           <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
           </svg>
-          Feedback
+          Enviar Feedback
         </NuxtLink>
         <NuxtLink
           to="/help"
@@ -86,7 +76,7 @@
           <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
-          Help & Support
+          Ayuda y Soporte
         </NuxtLink>
         <button
           @click="handleLogout"
@@ -146,6 +136,8 @@ const pageTitle = computed(() => {
   if (path.startsWith('/simulador/resultados')) return 'Simulador / Resultados'; // <-- Añade esta línea
   if (path.startsWith('/simulador')) return 'Simulador'; // <-- Mueve esta línea después
   if (path.startsWith('/configuracion')) return 'Configuración';
+  if (path.startsWith('/feedback')) return 'Feedback';
+  if (path.startsWith('/help')) return 'Ayuda y Soporte';
 
   // Título por defecto si no coincide
   return 'SimuCrédito';

@@ -525,6 +525,7 @@
 import { ref, reactive, computed, onMounted, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import { useClients } from '~/composables/useClients.ts'
+import { useNotifications } from '~/composables/useNotifications'
 import {
   HomeIcon,
   BanknotesIcon,
@@ -550,6 +551,7 @@ definePageMeta({
 
 const router = useRouter()
 const { createClient: apiCreateClient, checkPreQualification } = useClients()
+const { showSuccess, showError } = useNotifications()
 
 const currentStep = ref(0)
 const isSubmitting = ref(false)
@@ -704,7 +706,7 @@ const nextStep = async () => {
       preQualificationApiResult.value = result
     } catch (error) {
       console.error('Error checking pre-qualification:', error)
-      alert('Error al pre-calificar: ' + error.message)
+      showError('Error al pre-calificar: ' + (error.message || 'Verifique los datos'))
       isSubmitting.value = false
       return
     }
@@ -762,12 +764,17 @@ const handleCreateClient = async () => {
     }
 
     await apiCreateClient(payload)
+
+    showSuccess('Cliente registrado exitosamente')
+
     router.push('/clientes')
   } catch (error) {
     console.error('Error creating client:', error)
     // Mostrar el mensaje exacto del backend si está disponible
     const errorMsg = error.response?._data?.message || error.message || 'Error desconocido';
-    alert('Error al crear el cliente: ' + errorMsg)
+
+    showError('Error al crear el cliente: ' + errorMsg)
+
   } finally {
     isSubmitting.value = false
   }

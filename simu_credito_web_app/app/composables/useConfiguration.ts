@@ -167,7 +167,21 @@ export const useConfiguration = () => {
             viv_max: globalValues.find(v => v.valueKey === 'BFH_MAX_PROPERTY_VALUE') || null,
         }
     }
-    // Optional POST y DELETE para Global Values si la API los soporta
+
+    const getCurrentExchangeRate = async () => {
+        try {
+            // Llamada al nuevo endpoint del backend
+            const response = await apiFetch('/configuration/exchange-rate/current', {
+                method: 'GET',
+            })
+            return response
+        } catch (error) {
+            console.error('Error fetching exchange rate:', error)
+            // Retornar null o valores por defecto en caso de error
+            return { sellPrice: 3.75, buyPrice: 3.74, date: new Date().toISOString() }
+        }
+    }
+
 
     return {
         listFinancialEntities,
@@ -182,5 +196,6 @@ export const useConfiguration = () => {
         createGlobalValue,
         updateGlobalValue,
         getTechoPropioParameters,
+        getCurrentExchangeRate,
     }
 }

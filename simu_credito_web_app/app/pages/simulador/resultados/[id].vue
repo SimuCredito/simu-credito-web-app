@@ -3,32 +3,22 @@
     <div class="bg-white border-b border-gray-200 px-6 py-4">
       <div class="flex justify-between items-center">
         <div class="flex gap-3">
-          <button
-              @click="goBackToSimulator"
-              class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center"
-          >
+          <button @click="goBackToSimulator" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center">
             <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Nueva Simulación
+            Nueva simulación
           </button>
 
-          <button
-              @click="handleEditParams"
-              class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-4 py-2 rounded-lg hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center font-medium"
-          >
+          <button @click="handleEditParams" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-4 py-2 rounded-lg hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center font-medium">
             <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
-            Editar Parámetros
+            Editar parámetros
           </button>
         </div>
 
-        <button
-            @click="exportToPDF"
-            :disabled="isExporting"
-            class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center disabled:opacity-50"
-        >
+        <button @click="exportToPDF" :disabled="isExporting" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center disabled:opacity-50">
           <svg v-if="!isExporting" class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
@@ -50,39 +40,63 @@
       <p class="mt-4 text-gray-600">Cargando resultados de la simulación...</p>
     </div>
     <div v-else class="max-w-7xl mx-auto px-4 py-8">
+
+      <div v-if="simulationCurrency === 'USD'" class="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg shadow-sm">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-blue-800">Simulación en Dólares Americanos (USD)</h3>
+            <div class="mt-2 text-sm text-blue-700">
+              <p>
+                Esta simulación se realizó utilizando un tipo de cambio referencial de
+                <strong>S/ {{ simulationData.inputs?.usdValue }}</strong>.
+              </p>
+              <p class="mt-1 text-xs">
+                * Los bonos del estado (BBP/Techo Propio) se calculan originalmente en Soles y han sido convertidos a Dólares para este cálculo.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="mb-8">
-        <h1 class="text-2xl font-semibold text-gray-900 mb-2">Resumen de la Operación</h1>
+        <h1 class="text-2xl font-semibold text-gray-900 mb-2">Resumen de la operación</h1>
         <p class="text-gray-600">{{ clientInfo?.name || 'Cliente' }} - {{ propertyInfo?.name || 'Propiedad' }}</p>
       </div>
 
       <div class="grid grid-cols-4 gap-4 mb-8">
         <div class="bg-white p-4 rounded-lg border border-gray-200">
           <dt class="text-sm font-medium text-gray-500">Valor Inmueble</dt>
-          <dd class="text-xl font-semibold text-gray-900">S/ {{ summary?.propertyValue?.toLocaleString() || '0' }}</dd>
+          <dd class="text-xl font-semibold text-gray-900">{{ formatMoney(summary?.propertyValue) }}</dd>
         </div>
         <div class="bg-white p-4 rounded-lg border border-gray-200">
           <dt class="text-sm font-medium text-gray-500">Aporte del Estado</dt>
-          <dd class="text-xl font-semibold text-gray-900">S/ {{ summary?.stateContribution?.toLocaleString() || '0' }}</dd>
+          <dd class="text-xl font-semibold text-gray-900">{{ formatMoney(summary?.stateContribution) }}</dd>
         </div>
         <div class="bg-white p-4 rounded-lg border border-gray-200">
           <dt class="text-sm font-medium text-gray-500">Cuota Inicial</dt>
-          <dd class="text-xl font-semibold text-gray-900">S/ {{ summary?.initialPayment?.toLocaleString() || '0' }}</dd>
+          <dd class="text-xl font-semibold text-gray-900">{{ formatMoney(summary?.initialPayment) }}</dd>
         </div>
         <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
           <dt class="text-sm font-medium text-indigo-800">Monto Financiado</dt>
-          <dd class="text-xl font-semibold text-indigo-600">S/ {{ summary?.financingAmount?.toLocaleString() || '0' }}</dd>
+          <dd class="text-xl font-semibold text-indigo-600">{{ formatMoney(summary?.financingAmount) }}</dd>
         </div>
       </div>
 
+      <!-- Indicadores Clave -->
       <div class="grid grid-cols-3 gap-6 mb-8">
         <div class="bg-indigo-50 p-6 rounded-lg border border-indigo-200">
           <div class="text-center">
             <h3 class="text-lg font-medium text-indigo-800 mb-2">Cuota Mensual Total</h3>
             <div class="text-6xl font-bold text-indigo-600 mb-2">
-              S/ {{ keyIndicators?.monthlyPayment ? keyIndicators.monthlyPayment.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00' }}
+              {{ formatMoney(keyIndicators?.monthlyPayment) }}
             </div>
             <div class="text-xs text-gray-500">
-              Incluye: capital, intereses, seguros y costos
+              Incluye: amortización, intereses, seguros y costos
             </div>
           </div>
         </div>
@@ -93,26 +107,116 @@
             <dd class="text-3xl font-semibold text-gray-900">{{ keyIndicators?.tcea ? keyIndicators.tcea.toFixed(2) : '0.00' }}%</dd>
           </div>
           <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <dt class="text-sm font-medium text-gray-500">COK</dt>
-            <dd class="text-3xl font-semibold text-gray-900">{{ keyIndicators?.cok ? keyIndicators.cok.toFixed(2) : '0.00' }}%</dd>
+            <dt class="text-sm font-medium text-gray-500">COK (Mensual)</dt>
+            <dd class="text-3xl font-semibold text-gray-900">{{ keyIndicators?.cok ? keyIndicators.cok.toFixed(4) : '0.00' }}%</dd>
           </div>
           <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
             <dt class="text-sm font-medium text-gray-500">VAN</dt>
-            <dd class="text-3xl font-semibold text-gray-900">S/ {{ keyIndicators?.van?.toLocaleString() || '0' }}</dd>
+            <dd class="text-3xl font-semibold text-gray-900">{{ formatMoney(keyIndicators?.van) }}</dd>
           </div>
           <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <dt class="text-sm font-medium text-gray-500">TIR</dt>
-            <dd class="text-3xl font-semibold text-gray-900">{{ keyIndicators?.tir ? keyIndicators.tir.toFixed(2) : '0.00' }}%</dd>
+            <dt class="text-sm font-medium text-gray-500">TIR (Mensual)</dt>
+            <dd class="text-3xl font-semibold text-gray-900">{{ keyIndicators?.tir ? keyIndicators.tir.toFixed(4) : '0.00' }}%</dd>
           </div>
-          <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+        </div>
+      </div>
+
+      <!-- NUEVA SECCIÓN: Resultados Totales -->
+      <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4 border-b pb-2">Resultados totales</h2>
+        <div class="grid grid-cols-3 gap-4">
+          <div class="bg-white p-4 rounded-lg border border-gray-200">
             <dt class="text-sm font-medium text-gray-500">Total Intereses</dt>
-            <dd class="text-3xl font-semibold text-gray-900">S/ {{ keyIndicators?.totalInterest?.toLocaleString() || '0' }}</dd>
+            <dd class="text-lg font-semibold text-gray-900">{{ formatMoney(totalResults?.totalInterest) }}</dd>
           </div>
+          <div class="bg-white p-4 rounded-lg border border-gray-200">
+            <dt class="text-sm font-medium text-gray-500">Amortización Capital</dt>
+            <dd class="text-lg font-semibold text-gray-900">{{ formatMoney(totalResults?.totalCapitalAmortization) }}</dd>
+          </div>
+          <div class="bg-white p-4 rounded-lg border border-gray-200">
+            <dt class="text-sm font-medium text-gray-500">Seguro Desgravamen</dt>
+            <dd class="text-lg font-semibold text-gray-900">{{ formatMoney(totalResults?.totalDesgravamen) }}</dd>
+          </div>
+          <div class="bg-white p-4 rounded-lg border border-gray-200">
+            <dt class="text-sm font-medium text-gray-500">Seguro Todo Riesgo</dt>
+            <dd class="text-lg font-semibold text-gray-900">{{ formatMoney(totalResults?.totalRiskInsurance) }}</dd>
+          </div>
+          <div class="bg-white p-4 rounded-lg border border-gray-200">
+            <dt class="text-sm font-medium text-gray-500">Comisiones Periódicas</dt>
+            <dd class="text-lg font-semibold text-gray-900">{{ formatMoney(totalResults?.totalCommissions) }}</dd>
+          </div>
+          <div class="bg-white p-4 rounded-lg border border-gray-200">
+            <dt class="text-sm font-medium text-gray-500">Portes / Gastos Adm.</dt>
+            <dd class="text-lg font-semibold text-gray-900">{{ formatMoney(totalResults?.totalAdminExpenses) }}</dd>
+          </div>
+        </div>
+      </div>
+
+      <!-- NUEVA SECCIÓN: Parámetros del Préstamo (Inputs) -->
+      <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4 border-b pb-2">Parámetros del préstamo</h2>
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Plazo</dt>
+              <dd class="mt-1 text-sm text-gray-900">{{ inputs?.termYears }} años ({{ (inputs?.termYears || 0) * 12 }} meses)</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Tasa interés</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                {{ inputs?.interestRate }}% {{ inputs?.interestRateType }}
+                {{ formatInterestRatePeiod(inputs?.interestRatePeriod) }}
+                <span v-if="inputs?.interestRateType === 'TN'">
+                  (cap: {{ formatInterestRatePeiod(inputs?.interestRateCapitalization) }})
+                </span>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Periodo de gracia</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                {{ inputs?.gracePeriodDurationMonths || 0 }} meses
+                <span v-if="inputs?.gracePeriodDurationMonths > 0">({{ inputs?.gracePeriodType === 'total' ? 'Total' : 'Parcial' }})</span>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Seguro desgravamen</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                {{ inputs?.desgravamenEnabled ? `Sí (${inputs?.desgravamenRate * 100}%)` : 'No' }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Seguro inmueble</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                {{ inputs?.propertyInsuranceEnabled ? `Sí (${inputs?.propertyInsuranceRate * 100}%)` : 'No' }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Costos mensuales</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                Comisiones: {{ formatMoney(inputs?.monthlyCommissions) }} | Adm: {{ formatMoney(inputs?.administrationCosts) }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">COK (Tasa oportunidad)</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                {{ inputs?.opportunityCostRate }}% {{ inputs?.opportunityCostType }}
+                {{ formatInterestRatePeiod(inputs?.opportunityCostPeriod) }}
+                <span v-if="inputs?.opportunityCostType === 'TN'">
+                  (cap: {{ formatInterestRatePeiod(inputs?.opportunityCostCapitalization) }})
+                </span>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Envío estado cuenta</dt>
+              <dd class="mt-1 text-sm text-gray-900 capitalize">{{ inputs?.statementDelivery === 'physical' ? 'Físico' : 'Virtual' }}</dd>
+            </div>
+          </dl>
         </div>
       </div>
 
       <AmortizationTable
           :simulation-id="simulationId"
+          :currency="simulationCurrency"
           :total-payments="amortizationSchedule?.totalPayments || 0"
           :current-page="amortizationSchedule?.currentPage || 0"
           :page-size="amortizationSchedule?.pageSize || 10"
@@ -128,18 +232,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
-// --- CAMBIO: Importar la función que acabamos de exportar ---
 import { useSimulations } from '~/composables/useSimulations'
+import { useClients } from '~/composables/useClients'
+import { useProperties } from '~/composables/useProperties'
 
 // Components
 import AmortizationTable from '~/components/tables/AmortizationTable.vue'
 
 const route = useRoute()
-// --- CAMBIO: Obtener ambas funciones ---
 const { getAmortizationSchedule, getSimulationById, exportSimulationToPDF, setSimulationDraft } = useSimulations()
-const { createSimulation, getSimulationDraft } = useSimulations()
 const { getClient } = useClients()
 const { getProperty } = useProperties()
 
@@ -149,42 +252,52 @@ const clientInfo = ref(null)
 const propertyInfo = ref(null)
 const summary = ref(null)
 const keyIndicators = ref(null)
+const totalResults = ref(null) // <--- NUEVO STATE
+const inputs = ref(null)       // <--- NUEVO STATE
 const amortizationSchedule = ref(null)
 const loading = ref(true)
-const isExporting = ref(false) // <-- AÑADIDO: Estado de carga para PDF
-const simulationData = ref(null) // <-- AÑADIDO: Estado para datos completos
+const isExporting = ref(false)
+const simulationData = ref(null)
+
+// Computed: Currency
+const simulationCurrency = computed(() => {
+  return simulationData.value?.inputs?.currency || 'PEN';
+});
+
+// Helper: Money Formatter
+const formatMoney = (value) => {
+  if (value === undefined || value === null) return '0.00';
+  return Number(value).toLocaleString('es-PE', {
+    style: 'currency',
+    currency: simulationCurrency.value,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
 
 // Methods
 const goBackToSimulator = () => {
-  // Limpia el draft por si acaso para empezar de cero
   setSimulationDraft(null)
   navigateTo('/simulador')
 }
 
 const handleEditParams = () => {
   if (!simulationData.value) return
-
-  // Guardamos los datos actuales en el estado compartido
   setSimulationDraft(simulationData.value)
-
-  // Redirigimos al wizard
   navigateTo('/simulador')
 }
-// --- CAMBIO: Lógica de exportación ---
+
 const exportToPDF = async () => {
   if (isExporting.value || !simulationData.value) return
   isExporting.value = true
   try {
-    // LLAMAR A LA FUNCIÓN REAL
     await exportSimulationToPDF(simulationData.value)
   } catch (error) {
     console.error('Error exporting to PDF:', error)
-    // TODO: Mostrar notificación de error al usuario
   } finally {
     isExporting.value = false
   }
 }
-// --- FIN DE CAMBIO ---
 
 const handlePageChange = async (page) => {
   try {
@@ -195,29 +308,26 @@ const handlePageChange = async (page) => {
   }
 }
 
-const loadDraftData = async () => {
-  const draft = getSimulationDraft()
-  if (!draft) return
-
-  try {
-    if (draft.clientInfo?.id) {
-      selectedClient.value = await getClient(draft.clientInfo.id)
-    }
-    if (draft.propertyInfo?.id) {
-      const prop = await getProperty(draft.propertyInfo.id)
-      selectedProperty.value = prop
-      localStorage.setItem('selectedProperty', JSON.stringify(prop))
-    }
-
-    if (draft.summary) {
-      initialPayment.value = draft.summary.initialPayment
-    }
-    currentStep.value = 4
-    if(draft.keyIndicators) {
-    }
-
-  } catch (e) {
-    console.error("Error restaurando borrador", e)
+const formatInterestRatePeiod = (period) => {
+  switch (period) {
+    case 'daily':
+      return 'Diario'
+    case 'weekly':
+      return 'Semanal'
+    case 'biweekly':
+      return 'Quincenal'
+    case 'monthly':
+      return 'Mensual'
+    case 'bimonthly':
+      return 'Bimestral'
+    case 'quarterly':
+      return 'Trimestral'
+    case 'semiannual':
+      return 'Semestral'
+    case 'annual':
+      return 'Anual'
+    default:
+      return ''
   }
 }
 
@@ -231,14 +341,17 @@ onMounted(async () => {
     }
     const data = await getSimulationById(simulationId.value)
 
+    console.log(JSON.stringify(data))
+
     clientInfo.value = data.clientInfo
     propertyInfo.value = data.propertyInfo
     summary.value = data.summary
     keyIndicators.value = data.keyIndicators
-
+    totalResults.value = data.totalResults // <--- ASIGNAR
+    inputs.value = data.inputs             // <--- ASIGNAR
     amortizationSchedule.value = data.amortizationSchedule
-
     simulationData.value = data
+
 
   } catch (error) {
     console.error('Error loading simulation results:', error)

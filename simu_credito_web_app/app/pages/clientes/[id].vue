@@ -7,7 +7,7 @@
             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd" />
             </svg>
-            Volver a Clientes
+            Volver a clientes
           </button>
           <h1 class="text-3xl font-bold tracking-tight text-gray-900">Detalles del Cliente</h1>
           <p class="mt-2 text-sm text-gray-600">Información completa del cliente y estado de precalificación.</p>
@@ -399,6 +399,7 @@
 import { ref, onMounted, computed, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useClients } from '~/composables/useClients'
+import { useNotifications } from '~/composables/useNotifications'
 import DeleteConfirmationModal from '~/components/modals/DeleteConfirmationModal.vue'
 import { RadioGroup, RadioGroupOption } from '@headlessui/vue'
 
@@ -410,6 +411,7 @@ definePageMeta({
 const route = useRoute()
 const router = useRouter()
 const { getClient, deleteClient, checkPreQualification, updateClient } = useClients()
+const { showSuccess, showError } = useNotifications()
 
 const client = ref(null)
 const editableClient = ref(null)
@@ -502,9 +504,10 @@ const saveChanges = async () => {
     client.value = updatedData
     isEditing.value = false
     editableClient.value = null
+    showSuccess('Cliente actualizado correctamente')
   } catch (err) {
     console.error('Error updating client:', err)
-    alert('Error al guardar los cambios')
+    showError('Error al guardar los cambios: ' + (err.message || 'Intente nuevamente'))
   } finally {
     isSaving.value = false
   }
@@ -518,10 +521,11 @@ const openDeleteModal = () => {
 const confirmDelete = async () => {
   try {
     await deleteClient(route.params.id)
+    showSuccess('Cliente eliminado del sistema')
     router.push('/clientes')
   } catch (err) {
     console.error('Error deleting client:', err)
-    alert('Error al eliminar el cliente')
+    showError('Error al eliminar el cliente: ' + (err.message || 'Verifique dependencias'))
   }
 }
 
@@ -553,7 +557,7 @@ const runPreQualification = async () => {
 
   } catch (err) {
     console.error('Error running pre-qualification:', err)
-    alert('Error al ejecutar pre-calificación')
+    showError('No se pudo ejecutar la pre-calificación. Revise los datos.')
   } finally {
     isPreQualifying.value = false
   }

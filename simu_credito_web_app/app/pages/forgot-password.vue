@@ -72,6 +72,10 @@
 </template>
 
 <script setup>
+import { useNotifications } from '~/composables/useNotifications'
+
+const { showSuccess, showError } = useNotifications()
+
 const { apiFetch } = useApi()
 
 const email = ref('')
@@ -90,11 +94,13 @@ const handleForgotPassword = async () => {
       body: JSON.stringify({ email: email.value }),
     })
     message.value = '¡Revisa tu correo!'
+    showSuccess('Enlace de recuperación enviado correctamente.')
   } catch (err) {
     if (err.response?.data?.message) {
       error.value = err.response.data.message
     } else {
       error.value = 'Error al enviar el enlace de recuperación'
+      showError('No se pudo enviar el correo. Intente más tarde.')
     }
   } finally {
     loading.value = false

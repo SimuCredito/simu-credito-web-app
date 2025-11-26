@@ -11,7 +11,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
         return navigateTo({
             path: '/login',
             query: {
-                redirect: to.fullPath
+                redirect: '/login'
             }
         })
     }

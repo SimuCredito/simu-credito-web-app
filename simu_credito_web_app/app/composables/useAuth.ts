@@ -7,6 +7,15 @@ interface UserProfile {
     name: string | null;
 }
 
+// Definimos la estructura interna de nuestro token decodificado
+interface JwtPayload {
+    sub: string;      // email standard
+    email?: string;   // por si acaso
+    firstName?: string; // Nuestro campo custom
+    lastName?: string;  // Nuestro campo custom
+    exp: number;
+}
+
 export const useAuth = () => {
     const { apiFetch } = useApi();
     const token = useCookie('auth_token', {
@@ -30,48 +39,74 @@ export const useAuth = () => {
         return initials || null;
     }
 
-    // Intenta reconstruir el usuario desde el token al recargar (si el token contiene info)
-    const initializeAuthFromToken = () => {
-        // Solo ejecuta si useState está vacío pero el token existe
-        if (!user.value && token.value) {
+    // Esta función sigue siendo útil para mantener datos frescos, pero ya no es crítica para la carga inicial
+    const fetchUserProfile = async () => {
+        if (!token.value) return;
+        try {
+            const profile = await apiFetch('/auth/me');
+            if (profile) {
+                // Mapeo seguro de la respuesta del backend
+                const firstName = profile.firstName;
+                const lastName = profile.lastName;
+                const email = profile.email;
+
+                updateUserState(email, firstName, lastName);
+            }
+        } catch (error: any) {
+            console.error('Error fetching user profile:', error);
+            if (error.response && error.response.status === 401) {
+                logout(); // Si el token no sirve, fuera
+            }
+        }
+    }
+
+    // Helper centralizado para actualizar el estado
+    const updateUserState = (email: string, firstName?: string, lastName?: string) => {
+        const fullName = setFullName(firstName, lastName);
+        // Si no hay nombre completo, usamos el email, si no hay email, 'Usuario'
+        const displayName = fullName || email || 'Usuario';
+        const initials = getInitials(firstName, lastName) || (email ? email.substring(0, 2).toUpperCase() : '?');
+
+        user.value = {
+            email: email || null,
+            name: displayName,
+            initials: initials
+        };
+    }
+
+    const initializeAuthFromToken = async () => {
+        if (user.value) return;
+
+        if (token.value) {
             try {
-                // Intenta decodificar el token para buscar datos
-                const decoded: { sub?: string, firstName?: string, lastName?: string, name?: string, email?: string } = jwtDecode(token.value);
+                // 1. LEER DATOS DIRECTAMENTE DEL TOKEN (INSTANTÁNEO)
+                const decoded = jwtDecode<JwtPayload>(token.value);
+                const email = decoded.sub || decoded.email || '';
 
-                const firstName = decoded.firstName;
-                const lastName = decoded.lastName;
-                // Intenta obtener nombre completo del campo 'name' o construirlo
-                const fullName = decoded.name || setFullName(firstName, lastName);
-                // Prioriza email de 'sub', luego 'email', luego null
-                const email = decoded.sub || decoded.email || null;
-                // Calcula iniciales si hay nombre
-                const initials = fullName ? fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : (email ? email.substring(0,2).toUpperCase() : '?');
+                // Aquí ocurre la magia: leemos los campos custom que agregamos en el backend
+                const tokenFirstName = decoded.firstName;
+                const tokenLastName = decoded.lastName;
 
-                // Si encontramos al menos email o nombre en el token, actualizamos el estado
-                if (email || fullName) {
-                    user.value = {
-                        email: email,
-                        name: fullName,
-                        initials: initials
-                    };
-                } else {
-                    user.value = null; // Token no contiene información útil
-                }
+                // Actualizamos el estado inmediatamente con lo que hay en el token
+                updateUserState(email, tokenFirstName, tokenLastName);
+
+                // 2. (Opcional) Validar con backend en segundo plano si quieres estar 100% seguro de que sigue activo
+                // await fetchUserProfile();
 
             } catch (e) {
-                console.error("Error decoding token during initialization, clearing token:", e);
-                token.value = null; // Token inválido
+                console.error("Error decoding token:", e);
+                token.value = null;
                 user.value = null;
             }
-        } else if (!token.value) {
-            user.value = null; // Asegura que el usuario esté nulo si no hay token
+        } else {
+            user.value = null;
         }
     }
 
     callOnce(initializeAuthFromToken);
 
     const login = async (email: string, password: string) => {
-        user.value = null; // Limpiar estado previo
+        user.value = null;
         try {
             const response = await apiFetch('/auth/login', {
                 method: 'POST',
@@ -80,42 +115,22 @@ export const useAuth = () => {
 
             if (response.token) {
                 token.value = response.token;
-
-                // Asume que la respuesta del login contiene estos campos
-                const respFirstName = response.firstName;
-                const respLastName = response.lastName;
-                const respEmail = response.email; // O usa response.sub si es el caso
-
-                const calculatedName = setFullName(respFirstName, respLastName);
-                const calculatedInitials = getInitials(respFirstName, respLastName);
-
-                // Actualiza el estado useState
-                user.value = {
-                    email: respEmail || null, // Asegúrate de que tu API devuelve 'email' o ajusta el nombre
-                    initials: calculatedInitials || (respEmail ? respEmail.substring(0,2).toUpperCase() : '?'),
-                    name: calculatedName || respEmail || null // Fallback a email si no hay nombre
-                };
-
-            } else {
-                // Si no hay token en la respuesta, limpia el usuario
-                user.value = null;
+                // Al hacer login, tenemos la respuesta fresca
+                updateUserState(response.email, response.firstName, response.lastName);
             }
             return response;
         } catch (error) {
-            user.value = null; // Limpia en caso de error
+            user.value = null;
             throw error;
         }
     }
 
     const register = async (firstName: string, lastName: string, email: string, password: string, phoneNumber?: string, companyName?: string) => {
         try {
-            const response = await apiFetch('/auth/register', {
+            return await apiFetch('/auth/register', {
                 method: 'POST',
-                body: JSON.stringify({
-                    email, password, firstName, lastName, phoneNumber, companyName
-                }),
+                body: JSON.stringify({ email, password, firstName, lastName, phoneNumber, companyName }),
             });
-            return response;
         } catch (error) {
             throw error;
         }
@@ -123,14 +138,12 @@ export const useAuth = () => {
 
     const logout = () => {
         token.value = null;
-        user.value = null; // Limpia useState
+        user.value = null;
         navigateTo('/login');
     }
 
     const isAuthenticated = () => {
-        // Puedes basar esto solo en el token o requerir también datos de usuario
         return !!token.value;
-        // return !!token.value && !!user.value;
     }
 
     return {
@@ -138,7 +151,7 @@ export const useAuth = () => {
         register,
         logout,
         isAuthenticated,
+        fetchUserProfile,
         user: readonly(user),
     }
 }
-
