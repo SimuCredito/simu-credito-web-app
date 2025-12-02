@@ -1,25 +1,31 @@
+// app/composables/useAuth.ts
 import { jwtDecode } from 'jwt-decode';
 import type { Ref } from 'vue';
 
+// 1. Ampliamos la interfaz del perfil para incluir los nuevos campos
 interface UserProfile {
     email: string | null;
     initials: string | null;
     name: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    phoneNumber?: string | null;
+    companyName?: string | null;
+    role?: string | null;
 }
 
-// Definimos la estructura interna de nuestro token decodificado
 interface JwtPayload {
-    sub: string;      // email standard
-    email?: string;   // por si acaso
-    firstName?: string; // Nuestro campo custom
-    lastName?: string;  // Nuestro campo custom
+    sub: string;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
     exp: number;
 }
 
 export const useAuth = () => {
     const { apiFetch } = useApi();
     const token = useCookie('auth_token', {
-        maxAge: 60 * 60 * 24 * 7, // 7 days
+        maxAge: 60 * 60 * 24 * 7,
         path: '/',
     });
 
@@ -39,39 +45,42 @@ export const useAuth = () => {
         return initials || null;
     }
 
-    // Esta función sigue siendo útil para mantener datos frescos, pero ya no es crítica para la carga inicial
+    // 2. Helper centralizado mejorado: Ahora acepta un objeto completo de datos
+    const updateUserState = (data: any) => {
+        // Soporte para cuando data viene del token (campos limitados) o del backend (perfil completo)
+        const email = data.email || data.sub;
+        const fullName = setFullName(data.firstName, data.lastName);
+        const displayName = fullName || email || 'Usuario';
+        const initials = getInitials(data.firstName, data.lastName) || (email ? email.substring(0, 2).toUpperCase() : '?');
+
+        user.value = {
+            email: email || null,
+            name: displayName,
+            initials: initials,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            // Estos campos pueden ser undefined si vienen del token, pero se llenarán con fetchUserProfile
+            phoneNumber: data.phoneNumber,
+            companyName: data.companyName,
+            role: data.role
+        };
+    }
+
     const fetchUserProfile = async () => {
         if (!token.value) return;
         try {
             const profile = await apiFetch('/auth/me');
             if (profile) {
-                // Mapeo seguro de la respuesta del backend
-                const firstName = profile.firstName;
-                const lastName = profile.lastName;
-                const email = profile.email;
-
-                updateUserState(email, firstName, lastName);
+                updateUserState(profile);
             }
+            return profile;
         } catch (error: any) {
             console.error('Error fetching user profile:', error);
             if (error.response && error.response.status === 401) {
-                logout(); // Si el token no sirve, fuera
+                logout();
             }
+            throw error;
         }
-    }
-
-    // Helper centralizado para actualizar el estado
-    const updateUserState = (email: string, firstName?: string, lastName?: string) => {
-        const fullName = setFullName(firstName, lastName);
-        // Si no hay nombre completo, usamos el email, si no hay email, 'Usuario'
-        const displayName = fullName || email || 'Usuario';
-        const initials = getInitials(firstName, lastName) || (email ? email.substring(0, 2).toUpperCase() : '?');
-
-        user.value = {
-            email: email || null,
-            name: displayName,
-            initials: initials
-        };
     }
 
     const initializeAuthFromToken = async () => {
@@ -79,20 +88,12 @@ export const useAuth = () => {
 
         if (token.value) {
             try {
-                // 1. LEER DATOS DIRECTAMENTE DEL TOKEN (INSTANTÁNEO)
                 const decoded = jwtDecode<JwtPayload>(token.value);
-                const email = decoded.sub || decoded.email || '';
+                // Inicializamos rápido con lo que hay en el token
+                updateUserState(decoded);
 
-                // Aquí ocurre la magia: leemos los campos custom que agregamos en el backend
-                const tokenFirstName = decoded.firstName;
-                const tokenLastName = decoded.lastName;
-
-                // Actualizamos el estado inmediatamente con lo que hay en el token
-                updateUserState(email, tokenFirstName, tokenLastName);
-
-                // 2. (Opcional) Validar con backend en segundo plano si quieres estar 100% seguro de que sigue activo
-                // await fetchUserProfile();
-
+                // Opcional: Cargar datos completos en segundo plano (telefono, empresa)
+                // fetchUserProfile();
             } catch (e) {
                 console.error("Error decoding token:", e);
                 token.value = null;
@@ -115,8 +116,8 @@ export const useAuth = () => {
 
             if (response.token) {
                 token.value = response.token;
-                // Al hacer login, tenemos la respuesta fresca
-                updateUserState(response.email, response.firstName, response.lastName);
+                // La respuesta de login suele traer datos básicos, actualizamos estado
+                updateUserState(response);
             }
             return response;
         } catch (error) {
@@ -131,6 +132,24 @@ export const useAuth = () => {
                 method: 'POST',
                 body: JSON.stringify({ email, password, firstName, lastName, phoneNumber, companyName }),
             });
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // 3. NUEVO MÉTODO: Actualizar Perfil
+    const updateProfile = async (profileData: { firstName: string; lastName: string; phoneNumber?: string; companyName?: string; password?: string }) => {
+        try {
+            const response = await apiFetch('/auth/profile', {
+                method: 'PUT',
+                body: JSON.stringify(profileData)
+            });
+
+            // Si la respuesta es exitosa, actualizamos el estado local inmediatamente
+            if (response) {
+                updateUserState(response);
+            }
+            return response;
         } catch (error) {
             throw error;
         }
@@ -152,6 +171,7 @@ export const useAuth = () => {
         logout,
         isAuthenticated,
         fetchUserProfile,
+        updateProfile, // Exportamos la nueva función
         user: readonly(user),
     }
 }

@@ -1,16 +1,16 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <div class="bg-white border-b border-gray-200 px-6 py-4">
-      <div class="flex justify-between items-center">
-        <div class="flex gap-3">
-          <button @click="goBackToSimulator" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center">
+    <div class="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
+        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <button @click="goBackToSimulator" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center justify-center w-full sm:w-auto">
             <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Nueva simulación
           </button>
 
-          <button @click="handleEditParams" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-4 py-2 rounded-lg hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center font-medium">
+          <button @click="handleEditParams" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-4 py-2 rounded-lg hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center justify-center font-medium w-full sm:w-auto">
             <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
@@ -18,7 +18,7 @@
           </button>
         </div>
 
-        <button @click="exportToPDF" :disabled="isExporting" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center disabled:opacity-50">
+        <button @click="exportToPDF" :disabled="isExporting" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center justify-center disabled:opacity-50 w-full sm:w-auto">
           <svg v-if="!isExporting" class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
@@ -39,7 +39,7 @@
       </svg>
       <p class="mt-4 text-gray-600">Cargando resultados de la simulación...</p>
     </div>
-    <div v-else class="max-w-7xl mx-auto px-4 py-8">
+    <div v-else class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
       <div v-if="simulationCurrency === 'USD'" class="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg shadow-sm">
         <div class="flex">
@@ -68,7 +68,7 @@
         <p class="text-gray-600">{{ clientInfo?.name || 'Cliente' }} - {{ propertyInfo?.name || 'Propiedad' }}</p>
       </div>
 
-      <div class="grid grid-cols-4 gap-4 mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div class="bg-white p-4 rounded-lg border border-gray-200">
           <dt class="text-sm font-medium text-gray-500">Valor Inmueble</dt>
           <dd class="text-xl font-semibold text-gray-900">{{ formatMoney(summary?.propertyValue) }}</dd>
@@ -87,12 +87,11 @@
         </div>
       </div>
 
-      <!-- Indicadores Clave -->
-      <div class="grid grid-cols-3 gap-6 mb-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div class="bg-indigo-50 p-6 rounded-lg border border-indigo-200">
           <div class="text-center">
             <h3 class="text-lg font-medium text-indigo-800 mb-2">Cuota Mensual Total</h3>
-            <div class="text-6xl font-bold text-indigo-600 mb-2">
+            <div class="text-5xl sm:text-6xl font-bold text-indigo-600 mb-2">
               {{ formatMoney(keyIndicators?.monthlyPayment) }}
             </div>
             <div class="text-xs text-gray-500">
@@ -101,7 +100,7 @@
           </div>
         </div>
 
-        <div class="col-span-2 grid grid-cols-2 gap-4">
+        <div class="col-span-1 lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
             <dt class="text-sm font-medium text-gray-500">TCEA</dt>
             <dd class="text-3xl font-semibold text-gray-900">{{ keyIndicators?.tcea ? keyIndicators.tcea.toFixed(2) : '0.00' }}%</dd>
@@ -121,10 +120,9 @@
         </div>
       </div>
 
-      <!-- NUEVA SECCIÓN: Resultados Totales -->
       <div class="mb-8">
         <h2 class="text-xl font-semibold text-gray-900 mb-4 border-b pb-2">Resultados totales</h2>
-        <div class="grid grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div class="bg-white p-4 rounded-lg border border-gray-200">
             <dt class="text-sm font-medium text-gray-500">Total Intereses</dt>
             <dd class="text-lg font-semibold text-gray-900">{{ formatMoney(totalResults?.totalInterest) }}</dd>
@@ -152,7 +150,6 @@
         </div>
       </div>
 
-      <!-- NUEVA SECCIÓN: Parámetros del Préstamo (Inputs) -->
       <div class="mb-8">
         <h2 class="text-xl font-semibold text-gray-900 mb-4 border-b pb-2">Parámetros del préstamo</h2>
         <div class="bg-white rounded-lg border border-gray-200 p-6">

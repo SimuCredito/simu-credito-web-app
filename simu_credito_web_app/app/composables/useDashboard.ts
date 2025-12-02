@@ -25,8 +25,22 @@ export const useDashboard = () => {
     }
   }
 
+    const getSimulationActivity = async (period = 'week') => {
+        try {
+            // Llama al nuevo endpoint
+            const response = await apiFetch(`/dashboard/activity?period=${period}`, {
+                method: 'GET',
+            })
+            return response
+        } catch (error) {
+            console.error('Error fetching activity:', error)
+            throw error
+        }
+    }
+
   return {
     getMetrics,
     getRecentActivity,
+    getSimulationActivity,
   }
 }

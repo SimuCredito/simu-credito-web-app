@@ -2,16 +2,20 @@
   <TransitionGroup
       name="notification"
       tag="div"
-      class="fixed top-20 right-4 z-50 flex flex-col gap-3 w-full max-w-md pointer-events-none"
+      class="fixed top-20 z-50 flex flex-col gap-3 w-full pointer-events-none
+             left-0 px-4 items-center
+             sm:left-auto sm:right-4 sm:items-end sm:px-0 sm:max-w-md"
   >
     <div
         v-for="notification in notifications"
         :key="notification.id"
-        class="pointer-events-auto flex items-start p-4 rounded-r-lg rounded-l-none shadow-lg border-l-4 bg-white transform transition-all duration-300 ring-1 ring-black ring-opacity-5"
+        class="pointer-events-auto flex items-start p-4 shadow-lg border-l-4 bg-white transform transition-all duration-300 ring-1 ring-black ring-opacity-5 w-full max-w-md
+               rounded-lg
+               sm:rounded-r-lg sm:rounded-l-none"
         :class="getBorderClass(notification.type)"
     >
       <div class="flex-shrink-0">
-        <svg v-if="notification.type === 'success'" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg v-if="notification.type === 'success'" class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <svg v-else-if="notification.type === 'error'" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -52,7 +56,7 @@ const { notifications, removeNotification } = useNotifications()
 
 const getBorderClass = (type: string) => {
   switch (type) {
-    case 'success': return 'border-green-500'
+    case 'success': return 'border-indigo-500'
     case 'error': return 'border-red-500'
     case 'warning': return 'border-yellow-500'
     case 'info': return 'border-blue-500'

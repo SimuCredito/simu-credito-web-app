@@ -1,17 +1,19 @@
 <template>
   <div class="px-4 sm:px-6 lg:px-8 py-6">
     <div class="mb-6">
-      <p class="mt-1 text-sm text-gray-500">Administra las configuraciones generales de la aplicación, incluyendo entidades financieras, parámetros de bonos y valores globales.</p>
+      <p class="mt-1 text-sm text-gray-500">
+        Administra las configuraciones generales de la aplicación, incluyendo entidades financieras, parámetros de bonos y valores globales.
+      </p>
     </div>
 
     <div class="border-b border-gray-200 mb-8">
-      <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+      <nav class="-mb-px flex space-x-8 overflow-x-auto no-scrollbar" aria-label="Tabs">
         <NuxtLink
             v-for="tab in tabs"
             :key="tab.name"
             :to="tab.to"
             :class="[
-            'whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors duration-150 focus:outline-none',
+            'whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors duration-150 focus:outline-none flex-shrink-0',
             isActiveTab(tab.to)
               ? 'border-indigo-500 text-indigo-600'
               : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
@@ -24,7 +26,8 @@
     </div>
 
     <div class="mt-8">
-      <NuxtPage /> </div>
+      <NuxtPage />
+    </div>
 
   </div>
 </template>
@@ -61,5 +64,11 @@ const isActiveTab = (tabPath) => {
 </script>
 
 <style scoped>
-/* Estilos específicos si son necesarios */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 </style>

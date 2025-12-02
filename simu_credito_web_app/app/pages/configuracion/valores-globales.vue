@@ -45,6 +45,7 @@
         </div>
       </form>
 
+      <!--
       <form @submit.prevent="handleSaveExchangeRate" class="card">
         <h3 class="text-xl font-semibold text-gray-900">Tipo de cambio del mercado</h3>
 
@@ -83,7 +84,7 @@
           </div>
         </div>
       </form>
-
+      -->
     </template>
   </div>
 </template>
